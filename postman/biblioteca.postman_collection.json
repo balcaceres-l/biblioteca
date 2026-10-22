@@ -1,0 +1,979 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Biblioteca API (.NET 10 + MariaDB)",
+    "description": "Colección completa de endpoints para el Sistema de Gestión de Biblioteca.\n\nIncluye scripts de prueba que guardan automáticamente el token JWT en la variable `jwt_token` al iniciar sesión con cualquiera de los roles (Administrador, Bibliotecario o Lector).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Autenticación y Cuentas",
+      "item": [
+        {
+          "name": "Login - Administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var data = pm.response.json();",
+                  "    pm.collectionVariables.set(\"jwt_token\", data.token);",
+                  "    console.log(\"Token JWT de Administrador guardado en jwt_token\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@biblioteca.com\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Inicia sesión como Administrador. Guarda automáticamente el token JWT generado en la variable {{jwt_token}}."
+          }
+        },
+        {
+          "name": "Login - Bibliotecario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var data = pm.response.json();",
+                  "    pm.collectionVariables.set(\"jwt_token\", data.token);",
+                  "    console.log(\"Token JWT de Bibliotecario guardado en jwt_token\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"biblio@biblioteca.com\",\n  \"password\": \"Biblio123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Inicia sesión como Bibliotecario (rol requerido para crear libros). Guarda el token en {{jwt_token}}."
+          }
+        },
+        {
+          "name": "Login - Lector",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var data = pm.response.json();",
+                  "    pm.collectionVariables.set(\"jwt_token\", data.token);",
+                  "    console.log(\"Token JWT de Lector guardado en jwt_token\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"lector@biblioteca.com\",\n  \"password\": \"Lector123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Inicia sesión como Lector. Guarda el token en {{jwt_token}}."
+          }
+        },
+        {
+          "name": "Registrar Nuevo Lector (Público)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo.lector@biblioteca.com\",\n  \"password\": \"Lector2026!\",\n  \"confirmPassword\": \"Lector2026!\",\n  \"nombreCompleto\": \"Juan Pérez\",\n  \"documentoIdentidad\": \"09876543-2\",\n  \"telefono\": \"+503 7000-0000\",\n  \"direccion\": \"Av. Central #123, Santa Ana\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Permite el autoregistro público asignando rol 'Lector' y creando su ficha automáticamente."
+          }
+        },
+        {
+          "name": "Perfil Actual (/me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            },
+            "description": "Retorna los datos del usuario autenticado, su rol principal y la lista de claims de permisos asignados."
+          }
+        },
+        {
+          "name": "Listar Usuarios (Solo Administrador)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "usuarios"]
+            },
+            "description": "Lista todos los usuarios del sistema. Requiere token de Administrador."
+          }
+        },
+        {
+          "name": "Crear Usuario Administrativo (Solo Administrador)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo.staff@biblioteca.com\",\n  \"password\": \"Staff123!\",\n  \"nombreCompleto\": \"Laura Martínez\",\n  \"rol\": \"Bibliotecario\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "usuarios"]
+            },
+            "description": "Crea una cuenta con un rol específico (Administrador, Bibliotecario o Lector). Requiere token de Administrador."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Libros y Catálogo",
+      "item": [
+        {
+          "name": "Listar Libros Paginados (Filtros y Búsqueda)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/libros?page=1&pageSize=10&search=&autorId=&categoriaId=&disponible=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "libros"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" },
+                { "key": "search", "value": "" },
+                { "key": "autorId", "value": "" },
+                { "key": "categoriaId", "value": "" },
+                { "key": "disponible", "value": "" }
+              ]
+            },
+            "description": "Retorna el catálogo paginado con metadatos (TotalCount, TotalPages, HasNext, HasPrevious)."
+          }
+        },
+        {
+          "name": "Libros Disponibles para Préstamo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/libros/disponibles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "libros", "disponibles"]
+            },
+            "description": "Lista únicamente los libros que tienen disponibilidad activa (no prestados)."
+          }
+        },
+        {
+          "name": "Detalle de Libro por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/libros/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "libros", "1"]
+            },
+            "description": "Obtiene la ficha completa de un libro, incluyendo autor, categoría y el token de concurrencia optimista 'rowVersion'."
+          }
+        },
+        {
+          "name": "Consultar Disponibilidad de Libro",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/libros/1/disponibilidad",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "libros", "1", "disponibilidad"]
+            },
+            "description": "Indica si el libro está disponible o en préstamo activo (con el nombre del lector y fecha de vencimiento)."
+          }
+        },
+        {
+          "name": "Crear Libro (EXCLUSIVO Bibliotecario)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Ficciones\",\n  \"isbn\": \"978-0307950925\",\n  \"resumen\": \"Colección de cuentos que exploran temas de laberintos, espejos y el infinito.\",\n  \"anioPublicacion\": 1944,\n  \"editorial\": \"Sur\",\n  \"disponible\": true,\n  \"autorId\": 3,\n  \"categoriaId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/libros",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "libros"]
+            },
+            "description": "Crea un nuevo libro en el catálogo. ¡IMPORTANTE! Solo el rol 'Bibliotecario' tiene permiso para ejecutar este endpoint. Si se usa el token de Administrador o Lector, devolverá 403 Forbidden."
+          }
+        },
+        {
+          "name": "Actualizar Libro (Admin o Bibliotecario)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"titulo\": \"Cien años de soledad (Edición Conmemorativa)\",\n  \"isbn\": \"978-0307474728\",\n  \"resumen\": \"Obra cumbre del realismo mágico y la literatura latinoamericana.\",\n  \"anioPublicacion\": 1967,\n  \"editorial\": \"Sudamericana\",\n  \"disponible\": true,\n  \"autorId\": 1,\n  \"categoriaId\": 1,\n  \"rowVersion\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/libros/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "libros", "1"]
+            },
+            "description": "Actualiza la información del libro. Soporta concurrencia optimista enviando el 'rowVersion' obtenido en el GET."
+          }
+        },
+        {
+          "name": "Alternar Disponibilidad Libro",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"disponible\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/libros/1/disponibilidad",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "libros", "1", "disponibilidad"]
+            },
+            "description": "Permite a los bibliotecarios o administradores cambiar directamente el estado disponible de un libro."
+          }
+        },
+        {
+          "name": "Subir Portada de Libro (multipart/form-data)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "archivo",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/libros/1/portada",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "libros", "1", "portada"]
+            },
+            "description": "Sube un archivo de imagen (JPG, PNG, WEBP) para asignarlo como portada del libro en wwwroot/uploads/libros."
+          }
+        },
+        {
+          "name": "Eliminar Libro (Solo Administrador)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/libros/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "libros", "1"]
+            },
+            "description": "Eliminación física del libro. Valida que no posea préstamos activos asociados. Solo permitido para Administradores."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Autores",
+      "item": [
+        {
+          "name": "Listar Autores Paginados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/autores?page=1&pageSize=10&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "autores"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" },
+                { "key": "search", "value": "" }
+              ]
+            },
+            "description": "Obtiene la lista paginada de autores registrados con conteo de sus libros."
+          }
+        },
+        {
+          "name": "Listar Todos los Autores (para Selects)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/autores/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "autores", "all"]
+            },
+            "description": "Retorna todos los autores sin paginar para alimentar combos o selects en formularios."
+          }
+        },
+        {
+          "name": "Detalle de Autor por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/autores/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "autores", "1"]
+            },
+            "description": "Retorna información biográfica del autor y la lista de sus libros en el catálogo."
+          }
+        },
+        {
+          "name": "Crear Autor (Admin o Bibliotecario)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Julio\",\n  \"apellido\": \"Cortázar\",\n  \"nacionalidad\": \"Argentina\",\n  \"biografia\": \"Escritor, traductor e intelectual argentino considerado uno de los autores más innovadores y originales de su tiempo.\",\n  \"fechaNacimiento\": \"1914-08-26T00:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/autores",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "autores"]
+            },
+            "description": "Registra un nuevo autor en el sistema."
+          }
+        },
+        {
+          "name": "Actualizar Autor (Admin o Bibliotecario)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"nombre\": \"Gabriel\",\n  \"apellido\": \"García Márquez\",\n  \"nacionalidad\": \"Colombiana\",\n  \"biografia\": \"Premio Nobel de Literatura 1982 y figura central del Boom latinoamericano.\",\n  \"fechaNacimiento\": \"1927-03-06T00:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/autores/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "autores", "1"]
+            },
+            "description": "Actualiza la información de un autor."
+          }
+        },
+        {
+          "name": "Eliminar Autor (Solo Administrador)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/autores/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "autores", "1"]
+            },
+            "description": "Elimina un autor si no tiene libros asociados. Solo Administrador."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Categorías",
+      "item": [
+        {
+          "name": "Listar Categorías Paginadas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias?page=1&pageSize=10&search=&activa=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorias"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" },
+                { "key": "search", "value": "" },
+                { "key": "activa", "value": "" }
+              ]
+            },
+            "description": "Lista paginada de categorías de libros con filtro de búsqueda."
+          }
+        },
+        {
+          "name": "Listar Todas las Categorías Activas (para Selects)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorias", "all"]
+            },
+            "description": "Retorna las categorías activas sin paginación para alimentar los selects de formularios."
+          }
+        },
+        {
+          "name": "Detalle de Categoría por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorias", "1"]
+            },
+            "description": "Obtiene la ficha de una categoría específica."
+          }
+        },
+        {
+          "name": "Crear Categoría (Admin o Bibliotecario)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Filosofía y Ensayo\",\n  \"descripcion\": \"Textos clásicos y contemporáneos de reflexión filosófica, ética y política.\",\n  \"activa\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorias"]
+            },
+            "description": "Crea una nueva categoría para organizar el catálogo de libros."
+          }
+        },
+        {
+          "name": "Actualizar Categoría (Admin o Bibliotecario)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"nombre\": \"Novela y Ficción\",\n  \"descripcion\": \"Obras de ficción narrativa de todas las épocas.\",\n  \"activa\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorias", "1"]
+            },
+            "description": "Actualiza el nombre, descripción o estado activo de una categoría."
+          }
+        },
+        {
+          "name": "Eliminar Categoría (Solo Administrador)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/categorias/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "categorias", "1"]
+            },
+            "description": "Elimina la categoría si no tiene libros vinculados. Solo Administrador."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Lectores",
+      "item": [
+        {
+          "name": "Listar Lectores Paginados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/lectores?page=1&pageSize=10&search=&activo=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lectores"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" },
+                { "key": "search", "value": "" },
+                { "key": "activo", "value": "" }
+              ]
+            },
+            "description": "Lista paginada de lectores registrados con conteo de préstamos activos e histórico."
+          }
+        },
+        {
+          "name": "Listar Todos los Lectores Activos (para Selects)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/lectores/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lectores", "all"]
+            },
+            "description": "Lista de lectores activos para poblar el dropdown de asignación en préstamos."
+          }
+        },
+        {
+          "name": "Detalle de Lector por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/lectores/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lectores", "1"]
+            },
+            "description": "Retorna la ficha del lector y el historial de sus préstamos."
+          }
+        },
+        {
+          "name": "Crear Lector Manualmente (Admin o Bibliotecario)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreCompleto\": \"Carlos Eduardo Morales\",\n  \"documentoIdentidad\": \"02468102-5\",\n  \"email\": \"carlos.morales@correo.com\",\n  \"telefono\": \"+503 7111-2233\",\n  \"direccion\": \"Colonia Escalón #45, San Salvador\",\n  \"activo\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/lectores",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lectores"]
+            },
+            "description": "Crea una ficha de lector manualmente sin necesidad de crear cuenta Identity."
+          }
+        },
+        {
+          "name": "Actualizar Lector (Admin o Bibliotecario)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"nombreCompleto\": \"Carlos Lector Demo Actualizado\",\n  \"documentoIdentidad\": \"01234567-8\",\n  \"email\": \"lector@biblioteca.com\",\n  \"telefono\": \"+503 7234-5678\",\n  \"direccion\": \"Calle Las Rosas #14, San Salvador\",\n  \"activo\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/lectores/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lectores", "1"]
+            },
+            "description": "Actualiza la información de contacto o estado activo del lector."
+          }
+        },
+        {
+          "name": "Eliminar Lector (Solo Administrador)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/lectores/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lectores", "1"]
+            },
+            "description": "Elimina un lector si no tiene préstamos activos. Solo Administrador."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Préstamos",
+      "item": [
+        {
+          "name": "Listar Préstamos Paginados (Filtros)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/prestamos?page=1&pageSize=10&estado=&libroId=&lectorId=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "prestamos"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" },
+                { "key": "estado", "value": "" },
+                { "key": "libroId", "value": "" },
+                { "key": "lectorId", "value": "" }
+              ]
+            },
+            "description": "Consulta préstamos con filtros por estado ('Activo', 'Devuelto', 'Cancelado', 'Vencido'), libro o lector."
+          }
+        },
+        {
+          "name": "Mis Préstamos (Lector Autenticado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/prestamos/mis-prestamos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "prestamos", "mis-prestamos"]
+            },
+            "description": "Retorna exclusivamente el historial de préstamos del lector que ha iniciado sesión."
+          }
+        },
+        {
+          "name": "Detalle de Préstamo por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/prestamos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "prestamos", "1"]
+            },
+            "description": "Obtiene la información detallada de un préstamo en particular."
+          }
+        },
+        {
+          "name": "Registrar Préstamo (Transacción Atómica y Concurrente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"libroId\": 1,\n  \"lectorId\": 1,\n  \"diasPrestamo\": 14,\n  \"observaciones\": \"Préstamo solicitado para lectura académica\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/prestamos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "prestamos"]
+            },
+            "description": "Registra un préstamo. Si el libro ya está ocupado por otra petición concurrente, devuelve automáticamente 409 Conflict y revierte la transacción."
+          }
+        },
+        {
+          "name": "Registrar Devolución de Préstamo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observaciones\": \"Libro devuelto en excelentes condiciones\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/prestamos/1/devolucion",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "prestamos", "1", "devolucion"]
+            },
+            "description": "Registra la entrega física del libro. Marca el préstamo como 'Devuelto' y vuelve a habilitar automáticamente el libro con 'Disponible = true'."
+          }
+        },
+        {
+          "name": "Cancelar Préstamo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivo\": \"Solicitud cancelada por el usuario antes del retiro físico\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/prestamos/1/cancelar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "prestamos", "1", "cancelar"]
+            },
+            "description": "Cancela un préstamo en estado 'Activo' y devuelve el libro a disponibilidad inmediata."
+          }
+        }
+      ]
+    }
+  ]
+}
