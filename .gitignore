@@ -1,0 +1,30 @@
+# Environment & Secrets
+.env
+*.env
+!*.env.example
+
+# .NET Build & Output
+bin/
+obj/
+**/bin/
+**/obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Node & Angular
+node_modules/
+**/node_modules/
+.angular/
+**/.angular/
+dist/
+**/dist/
+.npm/
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
