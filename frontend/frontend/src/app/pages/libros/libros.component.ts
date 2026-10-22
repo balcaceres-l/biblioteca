@@ -23,7 +23,7 @@ import { PaginationComponent } from '../../shared/components/pagination/paginati
           <p class="text-muted mb-0">Explora el catálogo, consulta disponibilidad y solicita o administra préstamos</p>
         </div>
 
-        @if (authService.hasPermission('Libros.Gestionar')) {
+        @if (authService.isBibliotecario()) {
           <button class="btn btn-primary d-flex align-items-center gap-2 shadow-sm" (click)="openCreateModal()">
             <i class="bi bi-plus-circle"></i>
             <span>Nuevo Libro</span>

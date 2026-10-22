@@ -195,7 +195,7 @@ public class LibrosController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy = Policies.LibrosGestionar)]
+    [Authorize(Policy = Policies.LibrosCrear)]
     [ProducesResponseType(typeof(LibroReadDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]

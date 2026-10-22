@@ -4,6 +4,7 @@ public static class Policies
 {
     public const string CatalogoConsultar = "CatalogoConsultarPolicy";
 
+    public const string LibrosCrear = "LibrosCrearPolicy";
     public const string LibrosGestionar = "LibrosGestionarPolicy";
     public const string LibrosEliminar = "LibrosEliminarPolicy";
 

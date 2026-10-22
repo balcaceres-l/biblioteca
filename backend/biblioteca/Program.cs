@@ -64,6 +64,10 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(Policies.CatalogoConsultar, policy =>
         policy.RequireClaim("Permiso", Permisos.CatalogoConsultar));
 
+    options.AddPolicy(Policies.LibrosCrear, policy =>
+        policy.RequireRole(Roles.Bibliotecario)
+              .RequireClaim("Permiso", Permisos.LibrosGestionar));
+
     options.AddPolicy(Policies.LibrosGestionar, policy =>
         policy.RequireRole(Roles.Administrador, Roles.Bibliotecario)
               .RequireClaim("Permiso", Permisos.LibrosGestionar));
